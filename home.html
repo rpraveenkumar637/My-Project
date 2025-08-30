@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Praveen's Blog</title>
+  <style>
+    /* Reset & Base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      background-color: #f4faff;
+      color: #333;
+    }
+
+    /* Navigation */
+    header {
+      background-color: #005f99;
+      padding: 1rem 2rem;
+    }
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    nav .logo {
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+    nav ul li a {
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    nav ul li a:hover {
+      text-decoration: underline;
+    }
+
+    /* Hero Section */
+    #hero {
+      text-align: center;
+      padding: 4rem 2rem;
+      background-color: #e6f2ff;
+    }
+    #hero h1 {
+      font-size: 3rem;
+      color: #005f99;
+      margin-bottom: 1rem;
+    }
+    #hero p {
+      font-size: 1.2rem;
+      max-width: 800px;
+      margin: 0 auto;
+      color: #333;
+    }
+
+    /* Recent Posts */
+    #posts {
+      max-width: 1200px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+    }
+    .post {
+      background-color: #ffffff;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .post img {
+      width: 100%;
+      display: block;
+    }
+    .post-content {
+      padding: 1.5rem;
+    }
+    .post-content h3 {
+      color: #005f99;
+      margin-bottom: 0.5rem;
+    }
+    .post-content p {
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      color: #555;
+    }
+    .post-content a {
+      color: #005f99;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .post-content a:hover {
+      text-decoration: underline;
+    }
+
+    /* Footer */
+    footer {
+      background-color: #005f99;
+      color: #ffffff;
+      text-align: center;
+      padding: 1.5rem 2rem;
+      margin-top: 3rem;
+    }
+    footer p {
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav>
+      <a href="index.html" class="logo">Praveen's Blog</a>
+      <ul>
+        <li><a href="home.html">Home</a></li>
+        <li><a href="about me.html">About Me</a></li>
+        <li><a href="projects.html">Projects</a></li>
+        <li><a href="https://www.linkedin.com/in/praveenkumar456/">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section id="hero">
+    <h1>Welcome to My World of Electronics</h1>
+    <p>
+      I’m Praveen, an EEE student at Agni College of Technology. Here I share my
+      journey through electrical circuits, aerospace explorations, physics experiments,
+      and the beauty of mathematics.
+    </p>
+  </section>
+
+  <section id="posts">
+    <article class="post">
+      <img src="path/to/your-image.jpg" alt="Blog post image">
+      <div class="post-content">
+        <h3>My First Blog Post</h3>
+        <p>
+          Today I’m starting my journey into blogging. I’ll be sharing thoughts on
+          engineering, space tech, and why Linux is my favorite OS for EEE work.
+        </p>
+        <a href="post1.html">Read More →</a>
+      </div>
+    </article>
+
+    <article class="post">
+      <img src="path/to/your-image2.jpg" alt="Another post image">
+      <div class="post-content">
+        <h3>Why I Love Linux</h3>
+        <p>
+          Linux gives me control, speed, and a vibrant community. Let me walk you
+          through choosing the best distro for engineering and simulation.
+        </p>
+        <a href="post2.html">Read More →</a>
+      </div>
+    </article>
+
+    <!-- Add more .post blocks as needed -->
+  </section>
+
+  <footer>
+    <p>© 2025 Praveen Kumar | Crafted with code and passion</p>
+  </footer>
+
+</body>
+</html>
