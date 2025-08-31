@@ -1,98 +1,247 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Contact Information</title>
+  <title>Contact Me</title>
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+
   <style>
-    /* Base Styles */
+    :root {
+      --primary: #005f99;
+      --light: #e6f7ff;
+      --white: #ffffff;
+      --shadow: rgba(0, 95, 153, 0.15);
+      --radius: 8px;
+      --font: 'Inter', sans-serif;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #e6f7ff;  /* Light blue background */
+      font-family: var(--font);
+      background: linear-gradient(135deg, var(--light), var(--white));
       color: #333;
+      line-height: 1.6;
     }
 
     h1 {
-      color: #005f99;             /* Deep blue */
       text-align: center;
-      padding: 40px 0 20px;
+      color: var(--primary);
+      margin: 2rem 0 1rem;
+      font-size: 2.5rem;
+      font-weight: 600;
     }
 
-    /* Container */
-    .info-container {
-      max-width: 600px;
-      margin: 0 auto 60px;
-      background-color: #ffffff;
-      border: 2px solid #005f99;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 95, 153, 0.15);
-      padding: 30px;
+    .container {
+      max-width: 1200px;
+      margin: 0 auto 3rem;
+      padding: 0 1rem;
     }
 
-    /* Contact List */
-    .info-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
+    /* Grid layout for info cards + form */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
     }
 
-    .info-list li {
-      margin: 16px 0;
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Info Cards */
+    .info-card {
+      background: var(--white);
+      border: 1px solid var(--primary);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: 0 4px 12px var(--shadow);
       display: flex;
       align-items: center;
+      gap: 1rem;
+      transition: transform .2s ease, box-shadow .2s ease;
     }
 
-    .info-list span.icon {
-      display: inline-block;
-      width: 24px;
-      font-size: 20px;
-      text-align: center;
-      margin-right: 12px;
-      color: #005f99;
+    .info-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px var(--shadow);
     }
 
-    .info-list a {
-      color: #005f99;
+    .info-card svg {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      fill: var(--primary);
+    }
+
+    .info-card div {
+      flex: 1;
+    }
+
+    .info-card div a {
+      color: var(--primary);
       text-decoration: none;
+      font-weight: 600;
     }
 
-    .info-list a:hover {
+    .info-card div a:hover {
       text-decoration: underline;
     }
 
-    /* Social Links */
-    .social-links {
-      margin-top: 30px;
-      text-align: center;
+    /* Contact Form */
+    form {
+      background: var(--white);
+      border: 1px solid var(--primary);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: 0 4px 12px var(--shadow);
     }
-    .social-links a {
+
+    form label {
+      display: block;
+      margin-bottom: .5rem;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    form input,
+    form textarea {
+      width: 100%;
+      padding: .75rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--primary);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-family: var(--font);
+    }
+
+    form textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    form button {
       display: inline-block;
-      margin: 0 10px;
-      font-size: 20px;
-      color: #005f99;
-      text-decoration: none;
+      background: var(--primary);
+      color: var(--white);
+      padding: .75rem 2rem;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background .2s ease, transform .1s ease;
     }
-    .social-links a:hover {
+
+    form button:hover {
+      background: #00467a;
+      transform: translateY(-2px);
+    }
+
+    /* Map Embed */
+    .map {
+      margin-top: 3rem;
+      border: 1px solid var(--primary);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    .map iframe {
+      width: 100%;
+      height: 320px;
+      border: none;
+    }
+
+    /* Social Links */
+    .social {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    .social a {
+      margin: 0 .5rem;
+      font-size: 1.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      transition: color .2s ease;
+    }
+
+    .social a:hover {
       color: #00467a;
     }
+
   </style>
 </head>
 <body>
-  <h1>Get in Touch</h1>
-  <div class="info-container">
-    <ul class="info-list">
-      <li><span class="icon">📍</span>123 Your Street, City, Country</li>
-      <li><span class="icon">✉️</span><a href="mailto:your.email@domain.com">your.email@domain.com</a></li>
-      <li><span class="icon">📞</span><a href="tel:+11234567890">+1 (123) 456-7890</a></li>
-      <li><span class="icon">🌐</span><a href="https://www.yourblog.com" target="_blank" rel="noopener">www.yourblog.com</a></li>
-    </ul>
 
-    <div class="social-links">
-      <a href="https://twitter.com/yourhandle" target="_blank" rel="noopener">🐦 Twitter</a>
-      <a href="https://linkedin.com/in/yourprofile" target="_blank" rel="noopener">💼 LinkedIn</a>
-      <a href="https://github.com/yourusername" target="_blank" rel="noopener">🐙 GitHub</a>
+  <h1>Contact Me</h1>
+  <div class="container grid">
+
+    <!-- Contact Info Cards -->
+    <div>
+      <div class="info-card">
+        <!-- Address Icon (SVG) -->
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.14 2 5 5.14 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.86-3.14-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/></svg>
+        <div>
+          <strong>Address</strong><br/>
+          Hello city
+        </div>
+      </div>
+
+      <div class="info-card">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        <div>
+          <strong>Email</strong><br/>
+          <a href="r.ptaveenkumar456outlook.com">r.ptaveenkumar456outlook.com</a>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <svg viewBox="0 0 24 24"><path d="M6.62 10.79a15.09 15.09 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21 11.36 11.36 0 003.57.57 1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1 11.36 11.36 0 00.57 3.57 1 1 0 01-.21 1.11l-2.24 2.11z"/></svg>
+        <div>
+          <strong>Phone</strong><br/>
+          <a href="tel:+11234567890">+1 (123) 456-7890</a>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <svg viewBox="0 0 24 24"><path d="M12 4c-4.42 0-8 3.58-8 8s3.58 8 8 8a8 8 0 011.94-.25C8.93 19.1 7 17.16 7 14.75a5 5 0 015-5c2.41 0 4.35 1.93 4.5 4.43.09.01.17.02.25.02 4.42 0 8-3.58 8-8s-3.58-8-8-8z"/></svg>
+        <div>
+          <strong>Website</strong><br/>
+          <a href="https://www.yourblog.com" target="_blank" rel="noopener">www.yourblog.com</a>
+        </div>
+      </div>
     </div>
+
+    <!-- Contact Form -->
+    <form action="#" method="POST" novalidate>
+      <label for="name">Your Name</label>
+      <input type="text" id="name" name="name" placeholder="Jane Doe" required autocomplete="name"/>
+
+      <label for="email">Your Email</label>
+      <input type="email" id="email" name="email" placeholder="jane.doe@example.com" required autocomplete="email"/>
+
+      <label for="message">Message</label>
+      <textarea id="message" name="message" placeholder="How can I help you?" required></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+
   </div>
+
+  <!-- Social Media Links -->
+  <div class="container social">
+    <a href="https://twitter.com/yourhandle" target="_blank" rel="noopener" aria-label="YouTube"></a>
+    <a href="https://www.linkedin.com/in/praveenkumar456/" target="_blank" rel="noopener" aria-label="LinkedIn">💼</a>
+    <a href="https://github.com/rpraveenkumar637" target="_blank" rel="noopener" aria-label="GitHub">🐙</a>
+  </div>
+
 </body>
 </html>
