@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact Us</title>
+  <style>
+    /* Base Styles */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #e6f7ff; /* Very light blue */
+    }
+
+    h1 {
+      color: #005f99; /* Deep blue */
+      text-align: center;
+      padding: 40px 0 0 0;
+    }
+
+    /* Container */
+    .contact-container {
+      max-width: 600px;
+      margin: 20px auto 60px auto;
+      background-color: #ffffff;
+      padding: 30px;
+      border: 2px solid #005f99;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 95, 153, 0.15);
+    }
+
+    /* Form Elements */
+    .contact-container label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #005f99;
+    }
+
+    .contact-container input,
+    .contact-container textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #005f99;
+      border-radius: 4px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    .contact-container textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    /* Submit Button */
+    .contact-container button {
+      background-color: #005f99;
+      color: #ffffff;
+      padding: 14px 24px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.2s ease;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .contact-container button:hover {
+      background-color: #00467a; /* Darker blue on hover */
+    }
+  </style>
+</head>
+<body>
+  <h1>Contact Us</h1>
+  <div class="contact-container">
+    <form action="#" method="post">
+      <label for="name">Name</label>
+      <input type="text" id="name" name="name" placeholder="Your name" required />
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" placeholder="you@example.com" required />
+
+      <label for="subject">Subject</label>
+      <input type="text" id="subject" name="subject" placeholder="Subject of your message" />
+
+      <label for="message">Message</label>
+      <textarea id="message" name="message" placeholder="Write your message here..." required></textarea>
+
+      <button type="submit">Send Message</button>
+    </form>
+  </div>
+</body>
+</html>
