@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mini Games | Praveen's Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mini Games Zone | Praveen's Blog</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -13,37 +13,85 @@
     }
     header {
       background-color: #0077cc;
-      color: white;
-      padding: 20px;
+      color: #fff;
       text-align: center;
+      padding: 20px;
       font-size: 2em;
-      font-weight: bold;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     .game-section {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
       gap: 30px;
       padding: 40px;
     }
     .game-card {
-      background-color: white;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0,119,204,0.2);
+      background: #fff;
       border: 1px solid #cce5ff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,119,204,0.2);
+      padding: 20px;
     }
-    iframe {
-      width: 100%;
-      height: 380px; /* enough for arrows + buttons */
-      border: none;
-      border-radius: 8px;
-      background-color: #e6f2ff;
-    }
-    h2 {
+    .game-card h2 {
       margin-top: 0;
       color: #0077cc;
+      text-align: center;
     }
+    button, input {
+      font-size: 16px;
+    }
+
+    /* Snake controls & layout */
+    #snakeContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #scoreboard {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    #controls {
+      margin-bottom: 10px;
+      display: flex;
+      gap: 8px;
+    }
+    #controls button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 5px;
+      background: #0077cc;
+      color: #fff;
+      cursor: pointer;
+    }
+    #controls button:disabled {
+      background: #99ccee;
+      cursor: default;
+    }
+    #gameCanvas {
+      max-width: 100%;
+      height: auto;
+      border: 2px solid #0077cc;
+      border-radius: 5px;
+    }
+    #joystick {
+      display: grid;
+      grid-template-columns: 50px 50px 50px;
+      grid-template-rows: 50px 50px 50px;
+      gap: 5px;
+      margin-top: 12px;
+    }
+    #joystick button {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 5px;
+      background: #0077cc;
+      color: #fff;
+      font-size: 20px;
+      padding: 0;
+    }
+    #joystick div { /* empty grid cells */ }
   </style>
 </head>
 <body>
@@ -52,134 +100,160 @@
 
   <div class="game-section">
 
-    <!-- … your other game-cards here … -->
+    <!-- Click Challenge -->
+    <div class="game-card">
+      <h2>Click Challenge</h2>
+      <div style="text-align:center;">
+        <button id="clickBtn" style="padding:20px 40px;border:none;border-radius:10px;background:#0077cc;color:#fff;cursor:pointer;">
+          Click Me
+        </button>
+        <p id="clickScore" style="font-size:18px;margin-top:10px;">Score: 0</p>
+      </div>
+    </div>
 
-    <!-- Game 3: Responsive Mini Snake with On-Screen Controls -->
+    <!-- Guess the Number -->
+    <div class="game-card">
+      <h2>Guess the Number</h2>
+      <div style="text-align:center;">
+        <input id="guessInput" type="number" placeholder="1–10" style="width:60px;padding:5px;" />
+        <button id="guessBtn" style="padding:6px 12px;margin-left:8px;">Guess</button>
+        <p id="guessResult" style="font-size:18px;margin-top:10px;"></p>
+      </div>
+    </div>
+
+    <!-- Mini Snake -->
     <div class="game-card">
       <h2>Mini Snake</h2>
-      <iframe srcdoc="
-        <style>
-          body {
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 10px;
-            background: #e6f2ff;
-          }
-          #controls, #arrow-controls {
-            margin-bottom: 10px;
-            display: flex;
-            gap: 10px;
-          }
-          button {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 5px;
-            background: #0077cc;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            flex: 1;
-          }
-          button:disabled {
-            background: #99ccee;
-            cursor: default;
-          }
-          #arrow-controls {
-            justify-content: center;
-          }
-          canvas {
-            max-width: 100%;
-            height: auto;
-            border: 2px solid #0077cc;
-            border-radius: 5px;
-          }
-        </style>
-
-        <div id='controls'>
-          <button id='start'>Start Game</button>
-          <button id='restart' disabled>Restart</button>
+      <div id="snakeContainer">
+        <div id="scoreboard">Score: 0</div>
+        <div id="controls">
+          <button id="startBtn">Start Game</button>
+          <button id="restartBtn" disabled>Restart</button>
         </div>
-
-        <canvas id='c' width='300' height='300'></canvas>
-
-        <div id='arrow-controls'>
-          <button id='up'>↑</button>
-          <button id='down'>↓</button>
-          <button id='left'>←</button>
-          <button id='right'>→</button>
+        <canvas id="gameCanvas" width="300" height="300"></canvas>
+        <div id="joystick">
+          <div></div>
+          <button id="upBtn">↑</button>
+          <div></div>
+          <button id="leftBtn">←</button>
+          <div></div>
+          <button id="rightBtn">→</button>
+          <div></div>
+          <button id="downBtn">↓</button>
+          <div></div>
         </div>
-
-        <script>
-          const canvas = document.getElementById('c');
-          const ctx = canvas.getContext('2d');
-          const grid = 15;
-          let snake, dx, dy, apple, gameInterval;
-
-          function initGame() {
-            snake = [{ x: 150, y: 150 }];
-            dx = grid; dy = 0;
-            apple = { x: 90, y: 90 };
-            clearInterval(gameInterval);
-            gameInterval = null;
-            draw();
-            document.getElementById('restart').disabled = true;
-            document.getElementById('start').disabled   = false;
-          }
-
-          function gameLoop() {
-            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-            snake.unshift(head);
-
-            if (head.x === apple.x && head.y === apple.y) {
-              apple.x = Math.floor(Math.random() * 20) * grid;
-              apple.y = Math.floor(Math.random() * 20) * grid;
-            } else {
-              snake.pop();
-            }
-            draw();
-          }
-
-          function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'blue';
-            snake.forEach(p => ctx.fillRect(p.x, p.y, grid, grid));
-            ctx.fillStyle = 'red';
-            ctx.fillRect(apple.x, apple.y, grid, grid);
-          }
-
-          // Button handlers
-          document.getElementById('start').onclick = () => {
-            if (!gameInterval) {
-              gameInterval = setInterval(gameLoop, 100);
-              document.getElementById('start').disabled   = true;
-              document.getElementById('restart').disabled = false;
-            }
-          };
-          document.getElementById('restart').onclick = initGame;
-
-          // Arrow-button mobile controls
-          document.getElementById('up').onclick    = () => { if (dy === 0) { dx = 0; dy = -grid; } };
-          document.getElementById('down').onclick  = () => { if (dy === 0) { dx = 0; dy = grid;  } };
-          document.getElementById('left').onclick  = () => { if (dx === 0) { dx = -grid; dy = 0;   } };
-          document.getElementById('right').onclick = () => { if (dx === 0) { dx = grid;  dy = 0;   } };
-
-          // Keep keyboard support too
-          document.addEventListener('keydown', e => {
-            if (e.key === 'ArrowUp'    && dy === 0) { dx = 0;   dy = -grid; }
-            if (e.key === 'ArrowDown'  && dy === 0) { dx = 0;   dy = grid;  }
-            if (e.key === 'ArrowLeft'  && dx === 0) { dx = -grid; dy = 0;    }
-            if (e.key === 'ArrowRight' && dx === 0) { dx = grid;  dy = 0;    }
-          });
-
-          // Initialize on load
-          initGame();
-        </script>
-      "></iframe>
+      </div>
     </div>
 
   </div>
+
+  <script>
+    // --- Click Challenge ---
+    (function(){
+      let score = 0;
+      const btn = document.getElementById('clickBtn');
+      const display = document.getElementById('clickScore');
+      btn.addEventListener('click', () => {
+        score++;
+        display.textContent = 'Score: ' + score;
+      });
+    })();
+
+    // --- Guess the Number ---
+    (function(){
+      const secret = Math.floor(Math.random()*10) + 1;
+      const input = document.getElementById('guessInput');
+      const btn   = document.getElementById('guessBtn');
+      const res   = document.getElementById('guessResult');
+      btn.addEventListener('click', () => {
+        const g = parseInt(input.value,10);
+        res.textContent = (g === secret) ? '🎉 Correct!' : '❌ Try again!';
+      });
+    })();
+
+    // --- Mini Snake ---
+    (function(){
+      const canvas = document.getElementById('gameCanvas');
+      const ctx    = canvas.getContext('2d');
+      const grid   = 15;
+      let snake, dx, dy, apple, interval, score;
+
+      const startBtn   = document.getElementById('startBtn');
+      const restartBtn = document.getElementById('restartBtn');
+      const scoreEl    = document.getElementById('scoreboard');
+      const upBtn      = document.getElementById('upBtn');
+      const downBtn    = document.getElementById('downBtn');
+      const leftBtn    = document.getElementById('leftBtn');
+      const rightBtn   = document.getElementById('rightBtn');
+
+      function init() {
+        snake = [{x:150,y:150}];
+        dx = grid; dy = 0;
+        apple = {x:90,y:90};
+        score = 0;
+        clearInterval(interval);
+        interval = null;
+        updateScore();
+        drawFrame();
+        restartBtn.disabled = true;
+        startBtn.disabled   = false;
+      }
+
+      function updateScore() {
+        scoreEl.textContent = 'Score: ' + score;
+      }
+
+      function drawFrame() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        // draw snake
+        ctx.fillStyle = 'blue';
+        snake.forEach(p=> ctx.fillRect(p.x,p.y,grid,grid));
+        // draw apple
+        ctx.fillStyle = 'red';
+        ctx.fillRect(apple.x,apple.y,grid,grid);
+      }
+
+      function loop() {
+        const head = {x:snake[0].x + dx, y:snake[0].y + dy};
+        snake.unshift(head);
+        if (head.x === apple.x && head.y === apple.y) {
+          score++;
+          updateScore();
+          apple.x = Math.floor(Math.random()*20)*grid;
+          apple.y = Math.floor(Math.random()*20)*grid;
+        } else {
+          snake.pop();
+        }
+        drawFrame();
+      }
+
+      // button handlers
+      startBtn.addEventListener('click', () => {
+        if (!interval) {
+          interval = setInterval(loop, 100);
+          startBtn.disabled   = true;
+          restartBtn.disabled = false;
+        }
+      });
+      restartBtn.addEventListener('click', init);
+
+      // on-screen D-pad
+      upBtn.addEventListener('click',    ()=>{ if (dy===0) { dx=0;dy=-grid; } });
+      downBtn.addEventListener('click',  ()=>{ if (dy===0) { dx=0;dy=grid;  } });
+      leftBtn.addEventListener('click',  ()=>{ if (dx===0) { dx=-grid;dy=0; } });
+      rightBtn.addEventListener('click', ()=>{ if (dx===0) { dx=grid; dy=0; } });
+
+      // keyboard support
+      document.addEventListener('keydown', e => {
+        if (e.key==='ArrowUp'    && dy===0) { dx=0;  dy=-grid; }
+        if (e.key==='ArrowDown'  && dy===0) { dx=0;  dy=grid;  }
+        if (e.key==='ArrowLeft'  && dx===0) { dx=-grid;dy=0;   }
+        if (e.key==='ArrowRight' && dx===0) { dx=grid; dy=0;   }
+      });
+
+      init();
+    })();
+  </script>
 
 </body>
 </html>
