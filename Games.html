@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Games | Praveen's Blog</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background-color: #f0f4fc;
+      color: #1a1a1a;
+    }
+    header {
+      background-color: #0077cc;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 2em;
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .game-section {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      padding: 40px;
+    }
+    .game-card {
+      background-color: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,119,204,0.2);
+      border: 1px solid #cce5ff;
+    }
+    iframe {
+      width: 100%;
+      height: 360px; /* slightly taller for 2 buttons */
+      border: none;
+      border-radius: 8px;
+      background-color: #e6f2ff;
+    }
+    h2 {
+      margin-top: 0;
+      color: #0077cc;
+    }
+  </style>
+</head>
+<body>
+
+  <header>🎮 Mini Games Zone</header>
+
+  <div class="game-section">
+
+    <!-- … other game-cards … -->
+
+    <!-- Game 3: Responsive Mini Snake with Restart -->
+    <div class="game-card">
+      <h2>Mini Snake</h2>
+      <iframe srcdoc="
+        <style>
+          body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 10px;
+            background: #e6f2ff;
+          }
+          #controls {
+            margin-bottom: 10px;
+          }
+          button {
+            margin: 0 5px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            background: #0077cc;
+            color: white;
+            cursor: pointer;
+          }
+          button:disabled {
+            background: #99ccee;
+            cursor: default;
+          }
+          canvas {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid #0077cc;
+            border-radius: 5px;
+          }
+        </style>
+
+        <div id='controls'>
+          <button id='start'>Start Game</button>
+          <button id='restart' disabled>Restart</button>
+        </div>
+        <canvas id='c' width='300' height='300'></canvas>
+
+        <script>
+          const canvas = document.getElementById('c'),
+                ctx = canvas.getContext('2d'),
+                grid = 15;
+          let snake, dx, dy, apple, gameInterval;
+
+          function initGame() {
+            snake = [{ x: 150, y: 150 }];
+            dx = grid; dy = 0;
+            apple = { x: 90, y: 90 };
+            clearInterval(gameInterval);
+            gameInterval = null;
+            draw();               // draw initial frame
+            document.getElementById('restart').disabled = true;
+            document.getElementById('start').disabled   = false;
+          }
+
+          function gameLoop() {
+            const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+            snake.unshift(head);
+
+            if (head.x === apple.x && head.y === apple.y) {
+              apple.x = Math.floor(Math.random() * 20) * grid;
+              apple.y = Math.floor(Math.random() * 20) * grid;
+            } else {
+              snake.pop();
+            }
+
+            draw();
+          }
+
+          function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // draw snake
+            ctx.fillStyle = 'blue';
+            snake.forEach(p => ctx.fillRect(p.x, p.y, grid, grid));
+
+            // draw apple
+            ctx.fillStyle = 'red';
+            ctx.fillRect(apple.x, apple.y, grid, grid);
+          }
+
+          document.getElementById('start').addEventListener('click', () => {
+            if (!gameInterval) {
+              gameInterval = setInterval(gameLoop, 100);
+              document.getElementById('start').disabled   = true;
+              document.getElementById('restart').disabled = false;
+            }
+          });
+
+          document.getElementById('restart').addEventListener('click', () => {
+            initGame();
+          });
+
+          // arrow-key controls
+          document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowUp'    && dy === 0) { dx = 0;   dy = -grid; }
+            if (e.key === 'ArrowDown'  && dy === 0) { dx = 0;   dy = grid;  }
+            if (e.key === 'ArrowLeft'  && dx === 0) { dx = -grid; dy = 0;    }
+            if (e.key === 'ArrowRight' && dx === 0) { dx = grid;  dy = 0;    }
+          });
+
+          // initialize on load
+          initGame();
+        </script>
+      "></iframe>
+    </div>
+
+  </div>
+
+</body>
+</html>
