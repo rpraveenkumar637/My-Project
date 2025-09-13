@@ -15,6 +15,7 @@
       --fg: #66aaff;
       --card-bg: #1e1e1e;
     }
+    * { box-sizing: border-box; }
     body {
       margin: 0; padding: 0;
       background: var(--bg);
@@ -27,64 +28,91 @@
       padding: 1rem; background: var(--card-bg);
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    h1 { margin: 0; }
-    .toggle-btn {
-      background: none; border: 2px solid var(--fg);
-      padding: 0.5rem 1rem;
-      color: var(--fg); cursor: pointer;
-      border-radius: 4px;
-    }
-    main { 
+    main {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1rem;
-      padding: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem; padding: 1rem;
     }
     .game-card {
       background: var(--card-bg);
-      border-radius: 8px; padding: 1rem;
+      border-radius: 8px;
+      padding: 1rem;
       display: flex; flex-direction: column;
-      align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    canvas, .memory-board, .quiz-card {
-      margin: 0.5rem 0; max-width: 100%;
-    }
+    .game-card h2 { margin-top: 0; }
     button { margin: 0.5rem; }
-    /* Mobile controls container */
+    canvas, .memory-board, .quiz-card {
+      max-width: 100%;
+      margin: 0.5rem 0;
+    }
+
+    /* Tic-Tac-Toe Grid */
+    .tictactoe-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      margin: 0.5rem 0;
+    }
+    .tictactoe-cell {
+      width: 60px; height: 60px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; background: var(--bg);
+      border: 2px solid var(--fg);
+      cursor: pointer;
+    }
+
+    /* Simon Says Buttons */
+    .simon-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 0.5rem 0;
+    }
+    .simon-btn {
+      width: 60px; height: 60px;
+      border: 2px solid #333;
+      border-radius: 8px;
+      opacity: 0.8;
+      cursor: pointer;
+    }
+    .simon-btn.red    { background: #e74c3c; }
+    .simon-btn.green  { background: #2ecc71; }
+    .simon-btn.blue   { background: #3498db; }
+    .simon-btn.yellow { background: #f1c40f; }
+
+    /* On-screen arrow controls */
     .controls {
       display: none;
       position: fixed;
-      bottom: 1rem;
-      left: 50%;
+      bottom: 1rem; left: 50%;
       transform: translateX(-50%);
       background: rgba(255,255,255,0.8);
-      border-radius: 8px;
-      padding: 0.5rem;
+      border-radius: 8px; padding: 0.5rem;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
       z-index: 100;
     }
     .controls button {
       width: 48px; height: 48px;
-      margin: 0.25rem;
-      border: 2px solid var(--fg);
-      background: var(--card-bg);
-      color: var(--fg);
-      border-radius: 4px;
-      font-size: 1.2rem;
+      margin: 0.25rem; border: 2px solid var(--fg);
+      background: var(--card-bg); color: var(--fg);
+      border-radius: 4px; font-size: 1.2rem;
     }
-    @media(max-width: 600px) {
+    @media (max-width: 600px) {
       .controls { display: flex; }
     }
   </style>
 </head>
 <body>
+
   <header>
     <h1>Games Lounge</h1>
-    <button class="toggle-btn" id="themeToggle">Toggle Dark Mode</button>
+    <button id="themeToggle">Toggle Dark Mode</button>
   </header>
 
   <main>
-    <!-- Snake Card -->
+    <!-- Snake -->
     <div class="game-card">
       <h2>Snake</h2>
       <canvas id="snakeCanvas" width="300" height="300"></canvas>
@@ -92,33 +120,54 @@
       <p>Score: <span id="snakeScore">0</span></p>
     </div>
 
-    <!-- Memory Match Card -->
+    <!-- Memory Match -->
     <div class="game-card">
       <h2>Memory Match</h2>
-      <div class="memory-board" id="memoryBoard"></div>
+      <div id="memoryBoard" class="memory-board"></div>
       <button onclick="initMemory()">Restart</button>
       <p>Attempts: <span id="memoryAttempts">0</span></p>
     </div>
 
-    <!-- Quiz Card -->
+    <!-- Quick Quiz -->
     <div class="game-card">
       <h2>Quick Quiz</h2>
-      <div class="quiz-card" id="quizContainer"></div>
+      <div id="quizContainer" class="quiz-card"></div>
       <button onclick="loadQuiz()">Next</button>
       <p>Correct: <span id="quizScore">0</span></p>
     </div>
 
-    <!-- Space Dodger Card -->
+    <!-- Space Dodger -->
     <div class="game-card">
       <h2>Space Dodger</h2>
       <canvas id="spaceCanvas" width="300" height="300"></canvas>
       <button onclick="startDodger()">Restart</button>
       <p>Score: <span id="dodgerScore">0</span></p>
     </div>
+
+    <!-- Tic-Tac-Toe -->
+    <div class="game-card">
+      <h2>Tic-Tac-Toe</h2>
+      <div id="ticTacToeGrid" class="tictactoe-grid"></div>
+      <button onclick="resetTicTacToe()">Restart</button>
+      <p id="ticTacToeResult">Turn: <span id="tttTurn">X</span></p>
+    </div>
+
+    <!-- Simon Says -->
+    <div class="game-card">
+      <h2>Simon Says</h2>
+      <div id="simonButtons" class="simon-buttons">
+        <div class="simon-btn red"    data-color="red"></div>
+        <div class="simon-btn green"  data-color="green"></div>
+        <div class="simon-btn blue"   data-color="blue"></div>
+        <div class="simon-btn yellow" data-color="yellow"></div>
+      </div>
+      <button onclick="nextSimon()">Start</button>
+      <p>Level: <span id="simonLevel">0</span></p>
+    </div>
   </main>
 
-  <!-- On-screen controls for mobile -->
-  <div class="controls" id="controls">
+  <!-- On-screen arrow controls -->
+  <div id="controls" class="controls">
     <button data-dir="up">↑</button>
     <button data-dir="left">←</button>
     <button data-dir="down">↓</button>
@@ -126,57 +175,68 @@
   </div>
 
   <script>
-    // Dark mode toggle
+    // Theme toggle
     document.getElementById('themeToggle').onclick = () => {
       const html = document.documentElement;
       html.dataset.theme = html.dataset.theme === 'dark' ? '' : 'dark';
     };
 
-    // Shared input handler
+    // Utility to get CSS var
+    function varGet(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name);
+    }
+
+    // Shared directional handler
     function handleDirection(dir) {
       // Snake
-      if (snakeDirLock) {
-        if (dir==='up' && dY===0) { dX=0; dY=-1; }
-        if (dir==='down' && dY===0) { dX=0; dY=1; }
-        if (dir==='left' && dX===0) { dX=-1; dY=0; }
-        if (dir==='right' && dX===0) { dX=1; dY=0; }
+      if (snakeLock) {
+        if (dir==='up'    && dy===0){ dx=0; dy=-1; }
+        if (dir==='down'  && dy===0){ dx=0; dy=1; }
+        if (dir==='left'  && dx===0){ dx=-1; dy=0; }
+        if (dir==='right' && dx===0){ dx=1; dy=0; }
       }
-      // Dodger
+      // Space Dodger
       if (dodger) {
-        if (dir==='left' && dodger.x>0) dodger.x -= 10;
+        if (dir==='left' && dodger.x>0)   dodger.x -= 10;
         if (dir==='right'&& dodger.x<280) dodger.x += 10;
       }
     }
-
-    // Attach touch events to on-screen buttons
     document.querySelectorAll('#controls button').forEach(btn => {
       btn.addEventListener('touchstart', e => {
         e.preventDefault();
         handleDirection(btn.dataset.dir);
       });
     });
+    window.addEventListener('keydown', e => {
+      snakeLock = false;
+      if (e.key==='ArrowUp')    handleDirection('up');
+      if (e.key==='ArrowDown')  handleDirection('down');
+      if (e.key==='ArrowLeft')  handleDirection('left');
+      if (e.key==='ArrowRight') handleDirection('right');
+    });
 
-    // ----- Snake Game -----
+    // ----- Snake -----
     const sCtx = document.getElementById('snakeCanvas').getContext('2d');
-    let snake, snakeInterval, dX, dY, snakeDirLock;
+    let snake, snakeInterval, dx, dy, food, snakeLock;
     function startSnake() {
       clearInterval(snakeInterval);
-      snake = [{ x: 10, y: 10 }];
-      dX=1; dY=0; snakeDirLock = true;
-      food = { x:5, y:5 };
+      snake = [{x:10,y:10}];
+      dx=1; dy=0; snakeLock=true;
+      food = {x:5,y:5};
       document.getElementById('snakeScore').textContent = 0;
       snakeInterval = setInterval(updateSnake, 100);
     }
     function updateSnake() {
-      const head = { x: snake[0].x + dX, y: snake[0].y + dY };
-      snakeDirLock = true;
-      if (head.x<0||head.y<0||head.x>19||head.y>19||
-          snake.some(p=>p.x===head.x&&p.y===head.y)) {
-        return clearInterval(snakeInterval);
-      }
+      const head = {x:snake[0].x+dx, y:snake[0].y+dy};
+      snakeLock = true;
+      if (
+        head.x<0||head.y<0||head.x>19||head.y>19||
+        snake.some(p=>p.x===head.x&&p.y===head.y)
+      ) return clearInterval(snakeInterval);
+
       snake.unshift(head);
       if (head.x===food.x && head.y===food.y) {
-        food = { x:Math.floor(Math.random()*20), y:Math.floor(Math.random()*20) };
+        food = {x:Math.floor(Math.random()*20), y:Math.floor(Math.random()*20)};
         document.getElementById('snakeScore').textContent = snake.length-1;
       } else {
         snake.pop();
@@ -191,13 +251,7 @@
       sCtx.fillStyle = '#ff5722';
       sCtx.fillRect(food.x*15, food.y*15, 14, 14);
     }
-    window.addEventListener('keydown', e=> {
-      snakeDirLock = false;
-      if (e.key==='ArrowUp') handleDirection('up');
-      if (e.key==='ArrowDown') handleDirection('down');
-      if (e.key==='ArrowLeft') handleDirection('left');
-      if (e.key==='ArrowRight') handleDirection('right');
-    });
+    startSnake();
 
     // ----- Memory Match -----
     const icons = ['🛰️','🚀','🛸','🪐','🌠','🌌'];
@@ -208,23 +262,23 @@
       memArr = [...icons, ...icons].sort(()=>0.5-Math.random());
       const board = document.getElementById('memoryBoard');
       board.innerHTML = '';
-      memArr.forEach((sym,i)=> {
+      memArr.forEach((icon,i) => {
         const card = document.createElement('div');
         card.textContent = '?';
         Object.assign(card.style, {
           width:'50px', height:'50px',
-          border:'1px solid var(--fg)',
           display:'inline-flex', justifyContent:'center', alignItems:'center',
-          fontSize:'24px', margin:'4px', background: varGet('--bg'),
+          fontSize:'24px', margin:'4px',
+          border:`1px solid var(--fg)`, background: varGet('--bg'),
           cursor:'pointer'
         });
         card.onclick = () => {
           if (flips.length===2||card.textContent!=='?') return;
-          card.textContent = sym; flips.push({card,sym});
+          card.textContent = icon; flips.push({card,icon});
           if (flips.length===2) {
             attempts++;
             document.getElementById('memoryAttempts').textContent = attempts;
-            if (flips[0].sym!==flips[1].sym) {
+            if (flips[0].icon!==flips[1].icon) {
               setTimeout(()=> flips.forEach(o=>o.card.textContent='?'), 800);
             }
             flips = [];
@@ -239,7 +293,7 @@
     const quizData = [
       {q:'What is 2+2?', opts:['3','4','5'], a:1},
       {q:'HTML stands for?', opts:['Hyper Text','High Text','Hot Mail'], a:0},
-      {q:'JS file extension?', opts:['.js','.jsx','.json'], a:0},
+      {q:'JS extension?', opts:['.js','.jsx','.json'], a:0}
     ];
     let qIdx=0, quizScore=0;
     function loadQuiz() {
@@ -250,9 +304,7 @@
       const cur = quizData[qIdx++];
       const cont = document.getElementById('quizContainer');
       cont.innerHTML = `<p>${cur.q}</p>` +
-        cur.opts.map((o,i)=>
-          `<label><input name="opt" type="radio" value="${i}"/>${o}</label><br>`
-        ).join('');
+        cur.opts.map((o,i)=>`<label><input name="opt" type="radio" value="${i}"/>${o}</label><br>`).join('');
       cont.nextElementSibling.onclick = () => {
         const sel = cont.querySelector('input:checked');
         if (sel && +sel.value===cur.a) {
@@ -269,7 +321,7 @@
     let dodger, asteroids, dodgerInterval;
     function startDodger() {
       clearInterval(dodgerInterval);
-      dodger = { x:140, y:260, w:20, h:20 };
+      dodger = {x:140,y:260,w:20,h:20};
       asteroids = [];
       document.getElementById('dodgerScore').textContent = 0;
       dodgerInterval = setInterval(updateDodger, 50);
@@ -278,39 +330,106 @@
       dCtx.fillStyle = varGet('--card-bg');
       dCtx.fillRect(0,0,300,300);
       if (Math.random()<0.03) asteroids.push({
-        x: Math.random()*280,
-        y: 0,
-        size: 10+Math.random()*20
+        x:Math.random()*280, y:0, size:10+Math.random()*20
       });
       dCtx.fillStyle = '#ff5722';
       asteroids.forEach((a,i)=> {
         a.y += 3;
-        dCtx.beginPath();
-        dCtx.arc(a.x,a.y,a.size,0,2*Math.PI);
-        dCtx.fill();
+        dCtx.beginPath(); dCtx.arc(a.x,a.y,a.size,0,2*Math.PI); dCtx.fill();
         if (a.y>300) {
           asteroids.splice(i,1);
           const sc = +document.getElementById('dodgerScore').textContent;
           document.getElementById('dodgerScore').textContent = sc+1;
         }
-        if (a.x>dodger.x && a.x<dodger.x+dodger.w &&
-            a.y>dodger.y && a.y<dodger.y+dodger.h) {
-          clearInterval(dodgerInterval);
-        }
+        if (
+          a.x>dodger.x && a.x<dodger.x+dodger.w &&
+          a.y>dodger.y && a.y<dodger.y+dodger.h
+        ) clearInterval(dodgerInterval);
       });
       dCtx.fillStyle = varGet('--fg');
       dCtx.fillRect(dodger.x,dodger.y,dodger.w,dodger.h);
     }
-    window.addEventListener('keydown', e => {
-      if (!dodger) return;
-      if (e.key==='ArrowLeft') handleDirection('left');
-      if (e.key==='ArrowRight') handleDirection('right');
-    });
+    startDodger();
 
-    // Utility to read CSS vars
-    function varGet(name) {
-      return getComputedStyle(document.documentElement).getPropertyValue(name);
+    // ----- Tic-Tac-Toe -----
+    let tttBoard, tttTurn;
+    function createTicTacToe() {
+      tttBoard = Array(9).fill('');
+      tttTurn = 'X';
+      const grid = document.getElementById('ticTacToeGrid');
+      grid.innerHTML = '';
+      for (let i=0; i<9; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'tictactoe-cell';
+        cell.onclick = () => playTTT(i, cell);
+        grid.appendChild(cell);
+      }
+      document.getElementById('tttTurn').textContent = tttTurn;
+      document.getElementById('ticTacToeResult').textContent = `Turn: ${tttTurn}`;
     }
+    function playTTT(idx, cell) {
+      if (tttBoard[idx] || checkTTTWin()) return;
+      tttBoard[idx] = tttTurn;
+      cell.textContent = tttTurn;
+      if (checkTTTWin()) {
+        document.getElementById('ticTacToeResult').textContent = `${tttTurn} Wins!`;
+      } else if (tttBoard.every(v=>v)) {
+        document.getElementById('ticTacToeResult').textContent = `Draw!`;
+      } else {
+        tttTurn = tttTurn==='X' ? 'O' : 'X';
+        document.getElementById('ticTacToeResult').textContent = `Turn: ${tttTurn}`;
+      }
+    }
+    function checkTTTWin() {
+      const wins = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+      return wins.some(line => {
+        const [a,b,c] = line;
+        return tttBoard[a] && tttBoard[a]===tttBoard[b] && tttBoard[b]===tttBoard[c];
+      });
+    }
+    function resetTicTacToe() { createTicTacToe(); }
+    createTicTacToe();
+
+    // ----- Simon Says -----
+    const simonBtns = Array.from(document.querySelectorAll('.simon-btn'));
+    let simonPattern = [], userPattern = [], simonLevel = 0;
+    function nextSimon() {
+      userPattern = [];
+      simonLevel++;
+      document.getElementById('simonLevel').textContent = simonLevel;
+      const colors = ['red','green','blue','yellow'];
+      const next = colors[Math.floor(Math.random()*4)];
+      simonPattern.push(next);
+      flashSimon();
+    }
+    function flashSimon() {
+      simonPattern.forEach((col,i) => {
+        setTimeout(() => {
+          const btn = simonBtns.find(b=>b.dataset.color===col);
+          btn.style.opacity = '1';
+          setTimeout(()=> btn.style.opacity='0.8', 400);
+        }, i * 600);
+      });
+    }
+    simonBtns.forEach(btn=>{
+      btn.onclick = () => {
+        const col = btn.dataset.color;
+        userPattern.push(col);
+        flashSimon();
+        const idx = userPattern.length - 1;
+        if (userPattern[idx] !== simonPattern[idx]) {
+          alert('Game Over! You reached level ' + simonLevel);
+          simonPattern=[]; userPattern=[]; simonLevel=0;
+          document.getElementById('simonLevel').textContent = 0;
+        } else if (userPattern.length === simonPattern.length) {
+          setTimeout(nextSimon, 800);
+        }
+      };
+    });
   </script>
 </body>
 </html>
