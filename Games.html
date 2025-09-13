@@ -3,386 +3,250 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mini Games Zone | Praveen's Blog</title>
+  <title>Your Games</title>
   <style>
+    :root {
+      --bg: #fff;
+      --fg: #004aad;
+      --card-bg: #f0f4ff;
+    }
+    [data-theme="dark"] {
+      --bg: #121212;
+      --fg: #66aaff;
+      --card-bg: #1e1e1e;
+    }
     body {
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      background-color: #f0f4fc;
-      color: #1a1a1a;
+      margin: 0; padding: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: Arial, sans-serif;
+      transition: background 0.3s, color 0.3s;
     }
     header {
-      background-color: #0077cc;
-      color: #fff;
-      text-align: center;
-      padding: 20px;
-      font-size: 2em;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem; background: var(--card-bg);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    .game-section {
+    h1 { margin: 0; }
+    .toggle-btn {
+      background: none; border: 2px solid var(--fg);
+      padding: 0.5rem 1rem;
+      color: var(--fg); cursor: pointer;
+      border-radius: 4px;
+    }
+    main { 
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
-      gap: 30px;
-      padding: 40px;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
     }
     .game-card {
-      background: #fff;
-      border: 1px solid #cce5ff;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,119,204,0.2);
-      padding: 20px;
+      background: var(--card-bg);
+      border-radius: 8px; padding: 1rem;
+      display: flex; flex-direction: column;
+      align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    .game-card h2 {
-      margin-top: 0;
-      color: #0077cc;
-      text-align: center;
+    canvas, .memory-board, .quiz-card {
+      margin: 0.5rem 0; max-width: 100%;
     }
-    button, input {
-      font-size: 16px;
-    }
-
-    /* Snake controls & layout */
-    #snakeContainer {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    #scoreboard {
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    #controls {
-      margin-bottom: 10px;
-      display: flex;
-      gap: 8px;
-    }
-    #controls button {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 5px;
-      background: #0077cc;
-      color: #fff;
-      cursor: pointer;
-    }
-    #controls button:disabled {
-      background: #99ccee;
-      cursor: default;
-    }
-    #gameCanvas {
-      max-width: 100%;
-      height: auto;
-      border: 2px solid #0077cc;
-      border-radius: 5px;
-    }
-    #joystick {
-      display: grid;
-      grid-template-columns: 50px 50px 50px;
-      grid-template-rows: 50px 50px 50px;
-      gap: 5px;
-      margin-top: 12px;
-    }
-    #joystick button {
-      width: 100%;
-      height: 100%;
-      border: none;
-      border-radius: 5px;
-      background: #0077cc;
-      color: #fff;
-      font-size: 20px;
-      padding: 0;
-    }
-    #joystick div { /* empty grid cells */ }
+    button { margin: 0.5rem; }
+    /* Basic button and input styling */
+    .quiz-card input[type="radio"] { margin-right: 0.5rem; }
   </style>
 </head>
 <body>
-
-  <header>🎮 Mini Games Zone</header>
-
-  <div class="game-section">
-
-    <!-- Click Challenge -->
-    <div class="game-card">
-      <h2>Click Challenge</h2>
-      <div style="text-align:center;">
-        <button id="clickBtn" style="padding:20px 40px;border:none;border-radius:10px;background:#0077cc;color:#fff;cursor:pointer;">
-          Click Me
-        </button>
-        <p id="clickScore" style="font-size:18px;margin-top:10px;">Score: 0</p>
-      </div>
+  <header>
+    <h1>Games Lounge</h1>
+    <button class="toggle-btn" id="themeToggle">Toggle Dark Mode</button>
+  </header>
+  <main>
+    <!-- Snake Game Card -->
+    <div class="game-card" id="snakeCard">
+      <h2>Snake</h2>
+      <canvas id="snakeCanvas" width="300" height="300"></canvas>
+      <button onclick="startSnake()">Start / Restart</button>
+      <p>Score: <span id="snakeScore">0</span></p>
     </div>
 
-    <!-- Guess the Number -->
-    <div class="game-card">
-      <h2>Guess the Number</h2>
-      <div style="text-align:center;">
-        <input id="guessInput" type="number" placeholder="1–10" style="width:60px;padding:5px;" />
-        <button id="guessBtn" style="padding:6px 12px;margin-left:8px;">Guess</button>
-        <p id="guessResult" style="font-size:18px;margin-top:10px;"></p>
-      </div>
+    <!-- Memory Match Card -->
+    <div class="game-card" id="memoryCard">
+      <h2>Memory Match</h2>
+      <div class="memory-board" id="memoryBoard"></div>
+      <button onclick="initMemory()">Restart</button>
+      <p>Attempts: <span id="memoryAttempts">0</span></p>
     </div>
 
-    <!-- Rock Paper Scissors -->
-    <div class="game-card">
-      <h2>Rock Paper Scissors</h2>
-      <div style="text-align:center;">
-        <button id="rpsRock">🪨</button>
-        <button id="rpsPaper">📄</button>
-        <button id="rpsScissors">✂️</button>
-        <p id="rpsResult" style="font-size:18px;margin-top:10px;"></p>
-      </div>
+    <!-- Quiz Game Card -->
+    <div class="game-card" id="quizCard">
+      <h2>Quick Quiz</h2>
+      <div class="quiz-card" id="quizContainer"></div>
+      <button onclick="loadQuiz()">Next</button>
+      <p>Correct: <span id="quizScore">0</span></p>
     </div>
 
-    <!-- Memory Flip Card -->
-    <div class="game-card">
-      <h2>Memory Flip Card</h2>
-      <div id="memoryBoard" style="display:grid;grid-template-columns:repeat(4,40px);gap:10px;justify-content:center;margin-bottom:10px;"></div>
-      <p id="memoryMsg" style="text-align:center;font-size:18px;"></p>
-      <div style="text-align:center;"><button id="memoryRestart">Restart</button></div>
+    <!-- Space Dodger Card -->
+    <div class="game-card" id="spaceCard">
+      <h2>Space Dodger</h2>
+      <canvas id="spaceCanvas" width="300" height="300"></canvas>
+      <button onclick="startDodger()">Play / Restart</button>
+      <p>Score: <span id="dodgerScore">0</span></p>
     </div>
-
-    <!-- Simple Math Quiz -->
-    <div class="game-card">
-      <h2>Simple Math Quiz</h2>
-      <div style="text-align:center;">
-        <span id="mathQ" style="font-size:18px;"></span><br>
-        <input id="mathA" type="number" style="width:60px;padding:5px;margin-top:8px;" />
-        <button id="mathBtn" style="padding:6px 12px;margin-left:8px;">Check</button>
-        <p id="mathRes" style="font-size:18px;margin-top:10px;"></p>
-      </div>
-    </div>
-
-    <!-- Mini Snake -->
-    <div class="game-card">
-      <h2>Mini Snake</h2>
-      <div id="snakeContainer">
-        <div id="scoreboard">Score: 0</div>
-        <div id="controls">
-          <button id="startBtn">Start Game</button>
-          <button id="restartBtn" disabled>Restart</button>
-        </div>
-        <canvas id="gameCanvas" width="300" height="300"></canvas>
-        <div id="joystick">
-          <div></div>
-          <button id="upBtn">↑</button>
-          <div></div>
-          <button id="leftBtn">←</button>
-          <div></div>
-          <button id="rightBtn">→</button>
-          <div></div>
-          <button id="downBtn">↓</button>
-          <div></div>
-        </div>
-      </div>
-    </div>
-
-  </div>
+  </main>
 
   <script>
-    // --- Click Challenge ---
-    (function(){
-      let score = 0;
-      const btn = document.getElementById('clickBtn');
-      const display = document.getElementById('clickScore');
-      btn.addEventListener('click', () => {
-        score++;
-        display.textContent = 'Score: ' + score;
-      });
-    })();
+    // Dark mode
+    const toggle = document.getElementById('themeToggle');
+    toggle.onclick = () => {
+      document.documentElement.dataset.theme =
+        document.documentElement.dataset.theme === 'dark' ? '' : 'dark';
+    };
 
-    // --- Guess the Number ---
-    (function(){
-      const secret = Math.floor(Math.random()*10) + 1;
-      const input = document.getElementById('guessInput');
-      const btn   = document.getElementById('guessBtn');
-      const res   = document.getElementById('guessResult');
-      btn.addEventListener('click', () => {
-        const g = parseInt(input.value,10);
-        res.textContent = (g === secret) ? '🎉 Correct!' : '❌ Try again!';
-      });
-    })();
+    // ----- Snake Game -----
+    const sCanvas = document.getElementById('snakeCanvas');
+    const sCtx = sCanvas.getContext('2d');
+    let snake, dir, food, snakeInterval;
+    function startSnake() {
+      clearInterval(snakeInterval);
+      snake = [{ x: 10, y: 10 }];
+      dir = { x: 1, y: 0 };
+      food = { x: 5, y: 5 };
+      document.getElementById('snakeScore').innerText = 0;
+      snakeInterval = setInterval(updateSnake, 100);
+    }
+    function updateSnake() {
+      const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+      if (head.x < 0 || head.y < 0 || head.x > 19 || head.y > 19 ||
+          snake.some(p => p.x === head.x && p.y === head.y)) {
+        return clearInterval(snakeInterval);
+      }
+      snake.unshift(head);
+      if (head.x === food.x && head.y === food.y) {
+        food = { x: Math.floor(Math.random()*20), y: Math.floor(Math.random()*20) };
+        document.getElementById('snakeScore').innerText = snake.length - 1;
+      } else {
+        snake.pop();
+      }
+      drawSnake();
+    }
+    function drawSnake() {
+      sCtx.fillStyle = '#f0f4ff';
+      sCtx.fillRect(0,0,300,300);
+      sCtx.fillStyle = '#004aad';
+      snake.forEach(p => sCtx.fillRect(p.x*15, p.y*15, 14, 14));
+      sCtx.fillStyle = '#ff5722';
+      sCtx.fillRect(food.x*15, food.y*15, 14, 14);
+    }
+    window.addEventListener('keydown', e => {
+      if (e.key === 'ArrowUp' && dir.y===0) dir={x:0,y:-1};
+      if (e.key === 'ArrowDown' && dir.y===0) dir={x:0,y:1};
+      if (e.key === 'ArrowLeft' && dir.x===0) dir={x:-1,y:0};
+      if (e.key === 'ArrowRight'&& dir.x===0) dir={x:1,y:0};
+    });
 
-    // --- Rock Paper Scissors ---
-    (function(){
-      const choices = ['Rock','Paper','Scissors'];
-      const btns = [
-        document.getElementById('rpsRock'),
-        document.getElementById('rpsPaper'),
-        document.getElementById('rpsScissors')
-      ];
-      const result = document.getElementById('rpsResult');
-      btns.forEach((btn, i) => {
-        btn.addEventListener('click', () => {
-          const user = i;
-          const comp = Math.floor(Math.random()*3);
-          let msg = `You: ${choices[user]}, Computer: ${choices[comp]}. `;
-          if (user === comp) msg += "It's a draw!";
-          else if ((user-comp+3)%3===1) msg += "You win!";
-          else msg += "You lose!";
-          result.textContent = msg;
-        });
-      });
-    })();
-
-    // --- Memory Flip Card ---
-    (function(){
+    // ----- Memory Match -----
+    const memes = ['🛰️','🚀','🛸','🪐','🌠','🌌'];
+    let memArr, flips, attempts;
+    function initMemory() {
+      flips = [];
+      attempts = 0;
+      document.getElementById('memoryAttempts').innerText = attempts;
+      memArr = [...memes, ...memes].sort(() => 0.5 - Math.random());
       const board = document.getElementById('memoryBoard');
-      const msg = document.getElementById('memoryMsg');
-      const restart = document.getElementById('memoryRestart');
-      let cards, flipped, matched;
-      function shuffle(arr) {
-        for (let i=arr.length-1;i>0;i--) {
-          const j = Math.floor(Math.random()*(i+1));
-          [arr[i],arr[j]] = [arr[j],arr[i]];
-        }
-      }
-      function init() {
-        const values = ['🍎','🍎','🍌','🍌'];
-        shuffle(values);
-        board.innerHTML = '';
-        cards = [];
-        flipped = [];
-        matched = [];
-        msg.textContent = '';
-        for (let i=0;i<4;i++) {
-          const btn = document.createElement('button');
-          btn.textContent = '?';
-          btn.style.width = '40px';
-          btn.style.height = '40px';
-          btn.style.fontSize = '22px';
-          btn.disabled = false;
-          btn.dataset.idx = i;
-          btn.addEventListener('click', function(){
-            if (flipped.length<2 && !flipped.includes(i) && !matched.includes(i)) {
-              btn.textContent = values[i];
-              flipped.push(i);
-              if (flipped.length===2) {
-                setTimeout(()=>{
-                  if (values[flipped[0]]===values[flipped[1]]) {
-                    matched.push(...flipped);
-                    if (matched.length===4) msg.textContent = '🎉 All matched!';
-                  } else {
-                    cards[flipped[0]].textContent = '?';
-                    cards[flipped[1]].textContent = '?';
-                  }
-                  flipped = [];
-                }, 700);
-              }
-            }
-          });
-          board.appendChild(btn);
-          cards.push(btn);
-        }
-      }
-      restart.addEventListener('click', init);
-      init();
-    })();
-
-    // --- Simple Math Quiz ---
-    (function(){
-      const q = document.getElementById('mathQ');
-      const a = document.getElementById('mathA');
-      const btn = document.getElementById('mathBtn');
-      const res = document.getElementById('mathRes');
-      let x, y;
-      function newQ() {
-        x = Math.floor(Math.random()*10)+1;
-        y = Math.floor(Math.random()*10)+1;
-        q.textContent = `${x} + ${y} = ?`;
-        a.value = '';
-        res.textContent = '';
-      }
-      btn.addEventListener('click', () => {
-        const ans = parseInt(a.value,10);
-        if (ans === x+y) res.textContent = '✅ Correct!';
-        else res.textContent = '❌ Try again!';
-        setTimeout(newQ, 1200);
+      board.innerHTML = '';
+      memArr.forEach((icon,i) => {
+        const card = document.createElement('div');
+        card.textContent = '?';
+        card.style.cssText = 'width:50px;height:50px;border:1px solid #004aad;display:inline-flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;margin:4px;background:var(--bg);';
+        card.onclick = () => flipCard(card, icon, i);
+        board.appendChild(card);
       });
-      newQ();
-    })();
-
-    // --- Mini Snake ---
-    (function(){
-      const canvas = document.getElementById('gameCanvas');
-      const ctx    = canvas.getContext('2d');
-      const grid   = 15;
-      let snake, dx, dy, apple, interval, score;
-
-      const startBtn   = document.getElementById('startBtn');
-      const restartBtn = document.getElementById('restartBtn');
-      const scoreEl    = document.getElementById('scoreboard');
-      const upBtn      = document.getElementById('upBtn');
-      const downBtn    = document.getElementById('downBtn');
-      const leftBtn    = document.getElementById('leftBtn');
-      const rightBtn   = document.getElementById('rightBtn');
-
-      function init() {
-        snake = [{x:150,y:150}];
-        dx = grid; dy = 0;
-        apple = {x:90,y:90};
-        score = 0;
-        clearInterval(interval);
-        interval = null;
-        updateScore();
-        drawFrame();
-        restartBtn.disabled = true;
-        startBtn.disabled   = false;
-      }
-
-      function updateScore() {
-        scoreEl.textContent = 'Score: ' + score;
-      }
-
-      function drawFrame() {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        // draw snake
-        ctx.fillStyle = 'blue';
-        snake.forEach(p=> ctx.fillRect(p.x,p.y,grid,grid));
-        // draw apple
-        ctx.fillStyle = 'red';
-        ctx.fillRect(apple.x,apple.y,grid,grid);
-      }
-
-      function loop() {
-        const head = {x:snake[0].x + dx, y:snake[0].y + dy};
-        snake.unshift(head);
-        if (head.x === apple.x && head.y === apple.y) {
-          score++;
-          updateScore();
-          apple.x = Math.floor(Math.random()*20)*grid;
-          apple.y = Math.floor(Math.random()*20)*grid;
-        } else {
-          snake.pop();
+    }
+    function flipCard(card, icon, idx) {
+      if (flips.length===2 || card.textContent!== '?') return;
+      card.textContent = icon; flips.push({card,icon});
+      if (flips.length===2) {
+        attempts++;
+        document.getElementById('memoryAttempts').innerText = attempts;
+        if (flips[0].icon !== flips[1].icon) {
+          setTimeout(()=> flips.forEach(o=>o.card.textContent='?'), 800);
         }
-        drawFrame();
+        flips = [];
       }
+    }
+    initMemory();
 
-      // button handlers
-      startBtn.addEventListener('click', () => {
-        if (!interval) {
-          interval = setInterval(loop, 100);
-          startBtn.disabled   = true;
-          restartBtn.disabled = false;
+    // ----- Quiz Game -----
+    const quizData = [
+      {q:'What is 2+2?', opts:['3','4','5'], a:1},
+      {q:'HTML stands for?', opts:['Hyper Text','High Text','Hot Mail'], a:0},
+      {q:'JS filename ext?', opts:['.js','.jsx','.json'], a:0},
+    ];
+    let qIdx=0, scoreQ=0;
+    function loadQuiz() {
+      if (qIdx>=quizData.length) {
+        alert(`Quiz Over! Score: ${scoreQ}`);
+        qIdx = 0; scoreQ = 0;
+      }
+      const cur = quizData[qIdx++];
+      const cont = document.getElementById('quizContainer');
+      cont.innerHTML = `<p>${cur.q}</p>` +
+        cur.opts.map((o,i) =>
+          `<label><input name="opt" type="radio" value="${i}"/>${o}</label><br>`
+        ).join('');
+      const btn = cont.nextElementSibling;
+      btn.onclick = () => {
+        const sel = cont.querySelector('input:checked');
+        if (sel && +sel.value===cur.a) {
+          scoreQ++; document.getElementById('quizScore').innerText = scoreQ;
+        }
+        loadQuiz();
+      };
+    }
+    loadQuiz();
+
+    // ----- Space Dodger -----
+    const dCanvas = document.getElementById('spaceCanvas');
+    const dCtx = dCanvas.getContext('2d');
+    let dodger, asteroids, dodgerInt;
+    function startDodger() {
+      clearInterval(dodgerInt);
+      dodger = { x:140, y:260, w:20, h:20 };
+      asteroids = [];
+      document.getElementById('dodgerScore').innerText = 0;
+      dodgerInt = setInterval(updateDodger, 50);
+    }
+    function updateDodger() {
+      dCtx.fillStyle = varGet('--card-bg');
+      dCtx.fillRect(0,0,300,300);
+      // spawn asteroid
+      if (Math.random()<0.03) asteroids.push({x:Math.random()*280,y:0,size:10+Math.random()*20});
+      // move & draw asteroids
+      dCtx.fillStyle = '#ff5722';
+      asteroids.forEach((a,i)=>{
+        a.y += 3; dCtx.beginPath();
+        dCtx.arc(a.x,a.y,a.size,0,2*Math.PI); dCtx.fill();
+        if (a.y>300) {
+          asteroids.splice(i,1);
+          const sc = +document.getElementById('dodgerScore').innerText;
+          document.getElementById('dodgerScore').innerText = sc+1;
+        }
+        if (a.x > dodger.x && a.x < dodger.x+dodger.w &&
+            a.y > dodger.y && a.y < dodger.y+dodger.h) {
+          clearInterval(dodgerInt);
         }
       });
-      restartBtn.addEventListener('click', init);
-
-      // on-screen D-pad
-      upBtn.addEventListener('click',    ()=>{ if (dy===0) { dx=0;dy=-grid; } });
-      downBtn.addEventListener('click',  ()=>{ if (dy===0) { dx=0;dy=grid;  } });
-      leftBtn.addEventListener('click',  ()=>{ if (dx===0) { dx=-grid;dy=0; } });
-      rightBtn.addEventListener('click', ()=>{ if (dx===0) { dx=grid; dy=0; } });
-
-      // keyboard support
-      document.addEventListener('keydown', e => {
-        if (e.key==='ArrowUp'    && dy===0) { dx=0;  dy=-grid; }
-        if (e.key==='ArrowDown'  && dy===0) { dx=0;  dy=grid;  }
-        if (e.key==='ArrowLeft'  && dx===0) { dx=-grid;dy=0;   }
-        if (e.key==='ArrowRight' && dx===0) { dx=grid; dy=0;   }
-      });
-
-      init();
-    })();
+      // draw ship
+      dCtx.fillStyle = '#004aad';
+      dCtx.fillRect(dodger.x,dodger.y,dodger.w,dodger.h);
+    }
+    window.addEventListener('keydown', e => {
+      if (!dodger) return;
+      if (e.key==='ArrowLeft' && dodger.x>0) dodger.x -= 10;
+      if (e.key==='ArrowRight'&& dodger.x<280) dodger.x += 10;
+    });
+    function varGet(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name);
+    }
   </script>
-
 </body>
 </html>
