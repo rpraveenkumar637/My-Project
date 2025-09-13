@@ -121,6 +121,36 @@
       </div>
     </div>
 
+    <!-- Rock Paper Scissors -->
+    <div class="game-card">
+      <h2>Rock Paper Scissors</h2>
+      <div style="text-align:center;">
+        <button id="rpsRock">🪨</button>
+        <button id="rpsPaper">📄</button>
+        <button id="rpsScissors">✂️</button>
+        <p id="rpsResult" style="font-size:18px;margin-top:10px;"></p>
+      </div>
+    </div>
+
+    <!-- Memory Flip Card -->
+    <div class="game-card">
+      <h2>Memory Flip Card</h2>
+      <div id="memoryBoard" style="display:grid;grid-template-columns:repeat(4,40px);gap:10px;justify-content:center;margin-bottom:10px;"></div>
+      <p id="memoryMsg" style="text-align:center;font-size:18px;"></p>
+      <div style="text-align:center;"><button id="memoryRestart">Restart</button></div>
+    </div>
+
+    <!-- Simple Math Quiz -->
+    <div class="game-card">
+      <h2>Simple Math Quiz</h2>
+      <div style="text-align:center;">
+        <span id="mathQ" style="font-size:18px;"></span><br>
+        <input id="mathA" type="number" style="width:60px;padding:5px;margin-top:8px;" />
+        <button id="mathBtn" style="padding:6px 12px;margin-left:8px;">Check</button>
+        <p id="mathRes" style="font-size:18px;margin-top:10px;"></p>
+      </div>
+    </div>
+
     <!-- Mini Snake -->
     <div class="game-card">
       <h2>Mini Snake</h2>
@@ -169,6 +199,105 @@
         const g = parseInt(input.value,10);
         res.textContent = (g === secret) ? '🎉 Correct!' : '❌ Try again!';
       });
+    })();
+
+    // --- Rock Paper Scissors ---
+    (function(){
+      const choices = ['Rock','Paper','Scissors'];
+      const btns = [
+        document.getElementById('rpsRock'),
+        document.getElementById('rpsPaper'),
+        document.getElementById('rpsScissors')
+      ];
+      const result = document.getElementById('rpsResult');
+      btns.forEach((btn, i) => {
+        btn.addEventListener('click', () => {
+          const user = i;
+          const comp = Math.floor(Math.random()*3);
+          let msg = `You: ${choices[user]}, Computer: ${choices[comp]}. `;
+          if (user === comp) msg += "It's a draw!";
+          else if ((user-comp+3)%3===1) msg += "You win!";
+          else msg += "You lose!";
+          result.textContent = msg;
+        });
+      });
+    })();
+
+    // --- Memory Flip Card ---
+    (function(){
+      const board = document.getElementById('memoryBoard');
+      const msg = document.getElementById('memoryMsg');
+      const restart = document.getElementById('memoryRestart');
+      let cards, flipped, matched;
+      function shuffle(arr) {
+        for (let i=arr.length-1;i>0;i--) {
+          const j = Math.floor(Math.random()*(i+1));
+          [arr[i],arr[j]] = [arr[j],arr[i]];
+        }
+      }
+      function init() {
+        const values = ['🍎','🍎','🍌','🍌'];
+        shuffle(values);
+        board.innerHTML = '';
+        cards = [];
+        flipped = [];
+        matched = [];
+        msg.textContent = '';
+        for (let i=0;i<4;i++) {
+          const btn = document.createElement('button');
+          btn.textContent = '?';
+          btn.style.width = '40px';
+          btn.style.height = '40px';
+          btn.style.fontSize = '22px';
+          btn.disabled = false;
+          btn.dataset.idx = i;
+          btn.addEventListener('click', function(){
+            if (flipped.length<2 && !flipped.includes(i) && !matched.includes(i)) {
+              btn.textContent = values[i];
+              flipped.push(i);
+              if (flipped.length===2) {
+                setTimeout(()=>{
+                  if (values[flipped[0]]===values[flipped[1]]) {
+                    matched.push(...flipped);
+                    if (matched.length===4) msg.textContent = '🎉 All matched!';
+                  } else {
+                    cards[flipped[0]].textContent = '?';
+                    cards[flipped[1]].textContent = '?';
+                  }
+                  flipped = [];
+                }, 700);
+              }
+            }
+          });
+          board.appendChild(btn);
+          cards.push(btn);
+        }
+      }
+      restart.addEventListener('click', init);
+      init();
+    })();
+
+    // --- Simple Math Quiz ---
+    (function(){
+      const q = document.getElementById('mathQ');
+      const a = document.getElementById('mathA');
+      const btn = document.getElementById('mathBtn');
+      const res = document.getElementById('mathRes');
+      let x, y;
+      function newQ() {
+        x = Math.floor(Math.random()*10)+1;
+        y = Math.floor(Math.random()*10)+1;
+        q.textContent = `${x} + ${y} = ?`;
+        a.value = '';
+        res.textContent = '';
+      }
+      btn.addEventListener('click', () => {
+        const ans = parseInt(a.value,10);
+        if (ans === x+y) res.textContent = '✅ Correct!';
+        else res.textContent = '❌ Try again!';
+        setTimeout(newQ, 1200);
+      });
+      newQ();
     })();
 
     // --- Mini Snake ---
