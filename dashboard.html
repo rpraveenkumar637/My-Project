@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>WQM Dashboard</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#99a3b2;
+      --good:#16a34a; --warn:#f59e0b; --bad:#ef4444;
+      --accent:#06b6d4; --glass: rgba(255,255,255,0.03);
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color:#e6eef8;
+    }
+    html,body{height:100%; margin:0; background:linear-gradient(180deg,#071025 0%, #071829 100%); }
+    .container{max-width:1100px; margin:28px auto; padding:20px;}
+    header{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+    header h1{font-size:20px; margin:0; letter-spacing:0.2px;}
+    header .meta{color:var(--muted); font-size:13px;}
+
+    .grid{display:grid; grid-template-columns: repeat(3,1fr); gap:14px; margin-bottom:18px;}
+    .card{background:linear-gradient(180deg,var(--card), rgba(255,255,255,0.02)); border-radius:10px; padding:14px; box-shadow: 0 6px 20px rgba(2,6,23,0.6); }
+    .tile-title{font-size:13px; color:var(--muted); margin-bottom:6px;}
+    .tile-value{font-size:28px; font-weight:600; display:flex; align-items:baseline; gap:8px;}
+    .unit{font-size:13px; color:var(--muted); font-weight:500;}
+    .status-pill{padding:6px 10px; border-radius:999px; font-size:12px; font-weight:600; color:#021018;}
+
+    .chart-card{grid-column: 1 / -1; display:flex; gap:14px; align-items:flex-start;}
+    .chart-box{flex:1; background:var(--glass); padding:12px; border-radius:10px;}
+    canvas{width:100% !important; height:280px !important;}
+
+    .logs{margin-top:12px; max-height:132px; overflow:auto; font-size:13px; color:var(--muted); background:transparent; padding:10px; border-radius:8px;}
+    .log-item{padding:6px 0; border-bottom:1px dashed rgba(255,255,255,0.02);}
+
+    footer{margin-top:18px; color:var(--muted); font-size:13px; display:flex; justify-content:space-between; align-items:center;}
+    .small{font-size:12px; color:var(--muted);}
+
+    /* responsiveness */
+    @media (max-width:880px){
+      .grid{grid-template-columns:repeat(1,1fr);}
+      .chart-card{flex-direction:column;}
+      canvas{height:220px !important;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Water Quality Dashboard</h1>
+        <div class="meta">Live sensor stream — Turbidity · Temperature · pH</div>
+      </div>
+      <div class="meta small" id="lastUpdated">Last update: —</div>
+    </header>
+
+    <div class="grid">
+      <div class="card" id="tile-turbidity">
+        <div class="tile-title">Turbidity</div>
+        <div class="tile-value">
+          <span id="val-turbidity">—</span>
+          <span class="unit">NTU</span>
+          <span id="status-turbidity" class="status-pill" style="margin-left:auto;background:var(--accent);color:#021018;">—</span>
+        </div>
+        <div class="small" style="margin-top:8px;color:var(--muted)">Safe thresholds: &lt; 5 NTU preferred for many uses.</div>
+      </div>
+
+      <div class="card" id="tile-temp">
+        <div class="tile-title">Temperature</div>
+        <div class="tile-value">
+          <span id="val-temp">—</span>
+          <span class="unit">°C</span>
+          <span id="status-temp" class="status-pill" style="margin-left:auto;background:var(--accent);color:#021018;">—</span>
+        </div>
+        <div class="small" style="margin-top:8px;color:var(--muted)">Typical natural water ranges: 0–35°C depending on location.</div>
+      </div>
+
+      <div class="card" id="tile-ph">
+        <div class="tile-title">pH</div>
+        <div class="tile-value">
+          <span id="val-ph">—</span>
+          <span class="unit">pH</span>
+          <span id="status-ph" class="status-pill" style="margin-left:auto;background:var(--accent);color:#021018;">—</span>
+        </div>
+        <div class="small" style="margin-top:8px;color:var(--muted)">Safe drinking water pH: 6.5–8.5 (BIS/WHO guidance).</div>
+      </div>
+
+      <div class="chart-card" style="grid-column:1/-1;">
+        <div class="chart-box">
+          <canvas id="chart-temps"></canvas>
+        </div>
+        <div class="chart-box" style="min-width:320px;">
+          <canvas id="chart-other"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="tile-title">Event Log</div>
+        <div class="small">Alerts and recent readings</div>
+      </div>
+      <div class="logs" id="eventLog">
+        <div class="log-item">Dashboard initialized. Waiting for data...</div>
+      </div>
+    </div>
+
+    <footer>
+      <div class="small">Device: ESP32 / Arduino → Cloud | Update every 3s (demo)</div>
+      <div class="small">Praveen Kumar R — WQM System</div>
+    </footer>
+  </div>
+
+  <script>
+    // ---------- Configuration ----------
+    const DEMO_UPDATE_MS = 3000;          // demo update interval
+    const MAX_HISTORY = 40;               // points shown on charts
+
+    // Thresholds used for status coloring and alerts (tweak as per your spec)
+    const thresholds = {
+      turbidity: { good: 5, warn: 50 },  // NTU
+      temp: { goodMin: 5, goodMax: 35 }, // deg C
+      ph: { goodMin: 6.5, goodMax: 8.5 } // pH
+    };
+
+    // ---------- Chart setup ----------
+    const timeLabels = [];
+    const dataTurb = [];
+    const dataTemp = [];
+    const dataPh = [];
+
+    const ctx1 = document.getElementById('chart-temps').getContext('2d');
+    const tempChart = new Chart(ctx1, {
+      type: 'line',
+      data: {
+        labels: timeLabels,
+        datasets: [{
+          label: 'Temperature °C',
+          data: dataTemp,
+          borderColor: '#fb923c',
+          backgroundColor: 'rgba(251,146,60,0.06)',
+          tension: 0.28,
+          pointRadius: 0
+        }]
+      },
+      options: {
+        responsive:true,
+        maintainAspectRatio:false,
+        scales:{ x:{display:true}, y:{beginAtZero:false} },
+        plugins:{ legend:{display:true, labels:{color:'#cfe8ff'} } }
+      }
+    });
+
+    const ctx2 = document.getElementById('chart-other').getContext('2d');
+    const otherChart = new Chart(ctx2, {
+      type: 'line',
+      data: {
+        labels: timeLabels,
+        datasets: [
+          { label: 'Turbidity NTU', data: dataTurb, borderColor: '#60a5fa', backgroundColor:'rgba(96,165,250,0.06)', tension:0.28, pointRadius:0 },
+          { label: 'pH', data: dataPh, borderColor: '#34d399', backgroundColor:'rgba(52,211,153,0.06)', tension:0.28, pointRadius:0, yAxisID: 'y2' }
+        ]
+      },
+      options: {
+        responsive:true,
+        maintainAspectRatio:false,
+        scales:{
+          x:{display:true},
+          y:{position:'left', beginAtZero:true, title:{display:true, text:'Turbidity / Temp'}},
+          y2:{position:'right', beginAtZero:false, grid:{display:false}, title:{display:true, text:'pH'}}
+        },
+        plugins:{ legend:{display:true, labels:{color:'#cfe8ff'} } }
+      }
+    });
+
+    // ---------- UI helpers ----------
+    function setTile(id, value, unit, statusElId, statusText, statusColor){
+      document.getElementById(id).textContent = value;
+      const pill = document.getElementById(statusElId);
+      pill.textContent = statusText;
+      pill.style.background = statusColor;
+    }
+
+    function addLog(text){
+      const log = document.getElementById('eventLog');
+      const el = document.createElement('div');
+      el.className = 'log-item';
+      el.textContent = `[${new Date().toLocaleTimeString()}] ${text}`;
+      log.prepend(el);
+      // keep size bounded
+      while(log.children.length > 80) log.removeChild(log.lastChild);
+    }
+
+    function updateTimestamp(){
+      document.getElementById('lastUpdated').textContent = 'Last update: ' + new Date().toLocaleString();
+    }
+
+    // ---------- Status evaluation ----------
+    function evalTurbidity(val){
+      if(val <= thresholds.turbidity.good) return {text:'Good', color:'var(--good)'};
+      if(val <= thresholds.turbidity.warn) return {text:'Warning', color:'var(--warn)'};
+      return {text:'High', color:'var(--bad)'};
+    }
+
+    function evalTemp(val){
+      if(val >= thresholds.temp.goodMin && val <= thresholds.temp.goodMax) return {text:'Normal', color:'var(--good)'};
+      if(val < thresholds.temp.goodMin || val > thresholds.temp.goodMax) return {text:'Out of range', color:'var(--warn)'};
+      return {text:'Unknown', color:'var(--accent)'};
+    }
+
+    function evalPH(val){
+      if(val >= thresholds.ph.goodMin && val <= thresholds.ph.goodMax) return {text:'Neutral', color:'var(--good)'};
+      if(val < thresholds.ph.goodMin || val > thresholds.ph.goodMax) return {text:'Unsafe', color:'var(--warn)'};
+      return {text:'Unknown', color:'var(--accent)'};
+    }
+
+    // ---------- Main update function ----------
+    // payload expected shape: { turbidity: number, temp: number, ph: number, ts: optional timestamp }
+    function updateFromPayload(payload){
+      const ts = payload.ts ? new Date(payload.ts) : new Date();
+      // numeric formatting
+      const turb = (payload.turbidity === null || payload.turbidity === undefined) ? '—' : Number(payload.turbidity).toFixed(2);
+      const temp = (payload.temp === null || payload.temp === undefined) ? '—' : Number(payload.temp).toFixed(2);
+      const ph   = (payload.ph === null || payload.ph === undefined) ? '—' : Number(payload.ph).toFixed(2);
+
+      // UI tiles + status
+      const tStat = evalTurbidity(Number(turb));
+      const tempStat = evalTemp(Number(temp));
+      const pStat = evalPH(Number(ph));
+
+      setTile('val-turbidity', turb, 'NTU', 'status-turbidity', tStat.text, tStat.color);
+      setTile('val-temp', temp, '°C', 'status-temp', tempStat.text, tempStat.color);
+      setTile('val-ph', ph, 'pH', 'status-ph', pStat.text, pStat.color);
+
+      // charts: push time and values
+      const label = ts.toLocaleTimeString();
+      timeLabels.push(label);
+      dataTurb.push(Number(turb));
+      dataTemp.push(Number(temp));
+      dataPh.push(Number(ph));
+
+      // maintain history length
+      while(timeLabels.length > MAX_HISTORY) {
+        timeLabels.shift(); dataTurb.shift(); dataTemp.shift(); dataPh.shift();
+      }
+
+      tempChart.update();
+      otherChart.update();
+
+      // event log for abnormal readings
+      if(tStat.text !== 'Good') addLog(`Turbidity ${turb} NTU — ${tStat.text}`);
+      if(pStat.text !== 'Neutral') addLog(`pH ${ph} — ${pStat.text}`);
+      if(tempStat.text !== 'Normal') addLog(`Temperature ${temp} °C — ${tempStat.text}`);
+
+      // always update timestamp
+      updateTimestamp();
+    }
+
+    // ---------- Demo data generator (replace with real data feed) ----------
+    function demoRandomReading(){
+      // realistic demo ranges — tweak to match your sensors
+      const turb = parseFloat((Math.random()*60).toFixed(2));    // 0 - 60 NTU
+      const temp = parseFloat((12 + Math.random()*20).toFixed(2)); // 12 - 32 °C
+      const ph = parseFloat((5.5 + Math.random()*3.5).toFixed(2));  // 5.5 - 9.0
+
+      return { turbidity: turb, temp: temp, ph: ph, ts: Date.now() };
+    }
+
+    // ---------- Example: connecting a WebSocket / SSE / MQTT ----------
+    // Replace the demo loop below with your live source.
+    // Example WebSocket usage:
+    // const ws = new WebSocket('wss://your-server.example/ws');
+    // ws.onmessage = (ev) => updateFromPayload(JSON.parse(ev.data));
+    //
+    // Example REST poll (fetch every N seconds):
+    // setInterval(async ()=>{ const r = await fetch('/api/latest'); updateFromPayload(await r.json()); }, 3000);
+
+    // ---------- Start demo loop ----------
+    updateFromPayload({ turbidity: 1.2, temp: 25.0, ph: 7.1, ts: Date.now() });
+    setInterval(()=> {
+      const reading = demoRandomReading();
+      updateFromPayload(reading);
+    }, DEMO_UPDATE_MS);
+
+  </script>
+</body>
+</html>
